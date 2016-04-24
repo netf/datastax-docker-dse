@@ -1,9 +1,10 @@
 #### Description
 This is docker image for DataStax Enterprise and DataStax Community Edition. 
-It two types of variables:
 
-* build time
-* environemnt variables
+It has two type of configurable variables:
+
+* build time 
+* environemnt 
 
 ###### Build time variables
 * DATASTAX_VERSION - COMMUNITY | ENTERPRISE (default: COMMUNITY)
