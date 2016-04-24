@@ -15,11 +15,11 @@ install_repo_dsc() {
 }
 
 install_repo_dse() {
-    if [ "${DATASTAX_USERNAME}x" == "x" ] || [ "${DATASTAX_PASSWORD}x" == "x" ]; then
+    if [ "x${DATASTAX_USERNAME}x" == "xx" ] || [ "x${DATASTAX_PASSWORD}x" == "xx" ]; then
         echo "[!] You have to specify DATASTAX_USERNAME and/or DATASTAX_PASSWORD environemnt variable"
         exit 1
     fi
-    echo "deb http://${USERNAME}:${PASSWORD}@debian.datastax.com/enterprise stable main" \
+    echo "deb http://${DATASTAX_USERNAME}:${DATASTAX_PASSWORD}@debian.datastax.com/enterprise stable main" \
     | sudo tee -a /etc/apt/sources.list.d/datastax.sources.list
     install_repo_key
 }
@@ -31,6 +31,7 @@ install_dsc() {
         latest=`apt-cache madison cassandra | \
         awk -F\| '{gsub(/ /,""); print $2}' | head -1`
         dsc_latest=`echo $latest | awk -F. '{print $1$2}'`
+        export DEBIAN_FRONTEND=noninteractive && \
         apt-get install -y dsc${dsc_latest} cassandra=${latest} datastax-agent
     else
         cassandra_version=`apt-cache madison cassandra | \
@@ -40,6 +41,7 @@ install_dsc() {
             exit 1
         fi
         dsc_release=`echo $cassandra_version | awk -F. '{print $1$2}'`
+        export DEBIAN_FRONTEND=noninteractive && \
         apt-get install -y dsc${dsc_release} cassandra=${cassandra_version} datastax-agent
     fi
 }
@@ -48,7 +50,7 @@ install_dse() {
     install_repo_dse
     apt-get update
     if [ -z $DATASTAX_RELEASE ]; then
-        apt-get install -y dse-full
+        export DEBIAN_FRONTEND=noninteractive && apt-get install -y dse-full
     else
         dse_release=`apt-cache madison dse-full | \
         awk -v release=$DATASTAX_RELEASE -F\| '{gsub(/ /,""); if (match($2, "^" release)) print $2}' | head -1`
@@ -56,7 +58,7 @@ install_dse() {
             echo "[!] Error. DATASTAX_RELEASE ($DATASTAX_RELEASE) does not exist"
             exit 1
         fi
-        apt-get install -y dse-full=${dse_release}
+        export DEBIAN_FRONTEND=noninteractive && apt-get install -y dse-full=${dse_release}
     fi
 }
 

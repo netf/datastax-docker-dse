@@ -1,10 +1,10 @@
 ##
-##    Cassandra
+##    DSE/DSC
 ##
 ##
 
 FROM ubuntu
-MAINTAINER Piotr Wreczycki, piotr.wreczycki@datastax.com
+MAINTAINER Piotr Wreczycki
 
 # Datastax build arguments
 ARG DATASTAX_VERSION="COMMUNITY"
@@ -12,12 +12,17 @@ ARG DATASTAX_RELEASE
 ARG DATASTAX_USERNAME
 ARG DATASTAX_PASSWORD
 
-RUN env
+# DSE configuration settings
+ENV DSE_ANALYTICS ""
+ENV DSE_SEARCH ""
+ENV DSE_GRAPH ""
 
-ENV CLUSTERNAME ""
-ENV ANALYTICS ""
-ENV SEARCH ""
-ENV GRAPH ""
+# Cassandra configuration settings
+ENV CASSANDRA_CLUSTER_NAME ""
+ENV CASSANDRA_SEEDS ""
+ENV CASSANDRA_NUM_TOKENS ""
+ENV CASSANDRA_INITIAL_TOKEN ""
+
 
 # Add PPA for the necessary JDK
 RUN echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu precise main" | tee /etc/apt/sources.list.d/webupd8team-java.list
@@ -26,10 +31,7 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys EEA14886
 RUN apt-get update
 
 # Install other packages
-RUN apt-get install -y curl jq python-dev python-pip libyaml-dev
-
-# Install python modules
-RUN pip install python-etcd pyyaml
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get install -y curl
 
 # Preemptively accept the Oracle License
 RUN echo "oracle-java8-installer	shared/accepted-oracle-license-v1-1	boolean	true" > /tmp/oracle-license-debconf
@@ -38,23 +40,32 @@ RUN rm /tmp/oracle-license-debconf
 
 # Install the JDK
 RUN apt-get update
-RUN apt-get install -y oracle-java8-installer oracle-java8-set-default
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get install -y oracle-java8-installer oracle-java8-set-default
 
-# Install Cassandra
+# Install DSE/DSC
 ADD scripts/install.sh /tmp
 RUN chmod 755 /tmp/install.sh && /tmp/install.sh && rm -f /tmp/install.sh
 
-# Start the datastax-agent
-#RUN service datastax-agent start
+# Needed for Datastax agent
+RUN locale-gen en_US en_US.UTF-8
+
+VOLUME ["/logs", "/data"]
 
 # Cassandra
 EXPOSE 7199 7000 7001 9160 9042
-# Search
+# Solr
 EXPOSE 8983 8984
-# Analytics
-EXPOSE 4040 7080 7081 7077 8012 9290 10000 50030 50060
+# Spark
+EXPOSE 4040 7080 7081 7077
+# Hadoop
+EXPOSE 8012 9290 50030 50060
+# Hive/Shark
+EXPOSE 10000
 # DataStax agent
 EXPOSE 61621
 
+ADD scripts/init.sh /usr/local/bin/init.sh
+RUN chmod 755 /usr/local/bin/init.sh
+
 USER root
-CMD ["cassandra","-f","-p","/var/run/cassandra.pid"]
+ENTRYPOINT ["init.sh"]
