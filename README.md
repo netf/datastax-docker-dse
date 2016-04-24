@@ -1,5 +1,7 @@
 #### Description
-This is docker image for DataStax Enterprise and DataStax Community Edition. It two types of variables:
+This is docker image for DataStax Enterprise and DataStax Community Edition. 
+It two types of variables:
+
 * build time
 * environemnt variables
 
@@ -13,7 +15,6 @@ This is docker image for DataStax Enterprise and DataStax Community Edition. It 
 * DSE_ANALYTICS - enables SPARK
 * DSE_SEARCH - enables SOLR
 * DSE_GRAPH - not implemented
-
 * CASSANDRA_CLUSTER_NAME - Cassandra cluster name
 * CASSANDRA_SEEDS - Cassandra seeds (if not specified host IP address will be used)
 * CASSANDRA_NUM_TOKENS - number of VNODEs (if not specified single token node is assumed)
