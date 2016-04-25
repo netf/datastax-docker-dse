@@ -4,7 +4,7 @@ This is docker image for DataStax Enterprise and DataStax Community Edition.
 It has two type of configurable variables:
 
 * build time 
-* environemnt 
+* environment 
 
 ###### Build time variables
 * DATASTAX_VERSION - COMMUNITY | ENTERPRISE (default: COMMUNITY)
@@ -12,7 +12,7 @@ It has two type of configurable variables:
 * DATASTAX_USERNAME - DataStax username (only required when using ENTERPRISE version)
 * DATASTAX_PASSWORD - DataStax password_ (only requred when using ENTERPRISE version)
 
-###### Environemnt variables
+###### Environment variables
 * DSE_ANALYTICS - enables SPARK
 * DSE_SEARCH - enables SOLR
 * DSE_GRAPH - not implemented
