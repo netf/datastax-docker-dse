@@ -3,7 +3,7 @@
 ##
 ##
 
-FROM ubuntu
+FROM ubuntu:14.04
 MAINTAINER Piotr Wreczycki
 
 # Datastax build arguments
@@ -11,6 +11,9 @@ ARG DATASTAX_VERSION="COMMUNITY"
 ARG DATASTAX_RELEASE
 ARG DATASTAX_USERNAME
 ARG DATASTAX_PASSWORD
+
+# either OPSCENTER or DSE can be installed
+ARG DATASTAX_OPSCENTER="NO"
 
 # DSE configuration settings
 ENV DSE_ANALYTICS ""
@@ -22,6 +25,8 @@ ENV CASSANDRA_CLUSTER_NAME ""
 ENV CASSANDRA_SEEDS ""
 ENV CASSANDRA_NUM_TOKENS ""
 ENV CASSANDRA_INITIAL_TOKEN ""
+ENV CASSANDRA_DATA_DIR "/cassandra"
+ENV CASSANDRA_LOG_DIR "/cassandra-logs"
 
 
 # Add PPA for the necessary JDK
@@ -31,7 +36,7 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys EEA14886
 RUN apt-get update
 
 # Install other packages
-RUN export DEBIAN_FRONTEND=noninteractive && apt-get install -y curl
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get install -y curl sudo
 
 # Preemptively accept the Oracle License
 RUN echo "oracle-java8-installer	shared/accepted-oracle-license-v1-1	boolean	true" > /tmp/oracle-license-debconf
@@ -49,8 +54,6 @@ RUN chmod 755 /tmp/install.sh && /tmp/install.sh && rm -f /tmp/install.sh
 # Needed for Datastax agent
 RUN locale-gen en_US en_US.UTF-8
 
-VOLUME ["/logs", "/data"]
-
 # Cassandra
 EXPOSE 7199 7000 7001 9160 9042
 # Solr
@@ -63,6 +66,8 @@ EXPOSE 8012 9290 50030 50060
 EXPOSE 10000
 # DataStax agent
 EXPOSE 61621
+# OpsCenter
+EXPOSE 8888
 
 ADD scripts/init.sh /usr/local/bin/init.sh
 RUN chmod 755 /usr/local/bin/init.sh

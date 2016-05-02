@@ -5,12 +5,12 @@
 #
 
 install_repo_key() {
-    curl -L http://debian.datastax.com/debian/repo_key | sudo apt-key add -
+    curl -L http://debian.datastax.com/debian/repo_key | apt-key add -
 }
 
 install_repo_dsc() {
     echo "deb http://debian.datastax.com/community stable main" \
-    | sudo tee -a /etc/apt/sources.list.d/datastax.sources.list
+    | tee -a /etc/apt/sources.list.d/datastax.sources.list
     install_repo_key
 }
 
@@ -20,12 +20,11 @@ install_repo_dse() {
         exit 1
     fi
     echo "deb http://${DATASTAX_USERNAME}:${DATASTAX_PASSWORD}@debian.datastax.com/enterprise stable main" \
-    | sudo tee -a /etc/apt/sources.list.d/datastax.sources.list
+    | tee -a /etc/apt/sources.list.d/datastax.sources.list
     install_repo_key
 }
 
 install_dsc() {
-    install_repo_dsc
     apt-get update
     if [ -z $DATASTAX_RELEASE ]; then
         latest=`apt-cache madison cassandra | \
@@ -47,7 +46,6 @@ install_dsc() {
 }
 
 install_dse() {
-    install_repo_dse
     apt-get update
     if [ -z $DATASTAX_RELEASE ]; then
         export DEBIAN_FRONTEND=noninteractive && apt-get install -y dse-full
@@ -62,11 +60,22 @@ install_dse() {
     fi
 }
 
+install_opscenter() {
+    apt-get update
+    apt-get install -y opscenter
+}
+
 case $DATASTAX_VERSION in
 "ENTERPRISE")
-    install_dse
+    install_repo_dse
+    if [ ! -z $DATASTAX_OPSCENTER ] && [ "${DATASTAX_OPSCENTER}" == "YES" ]; then
+        install_opscenter
+    else
+        install_dse
+    fi
     ;;
 "COMMUNITY")
+    install_repo_dsc
     install_dsc
     ;;
 *)
