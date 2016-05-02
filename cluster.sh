@@ -6,7 +6,7 @@ NUM_NODES=$1
 [ -z "$CLUSTER_NAME" ] && CLUSTER_NAME="Test Cluster"
 
 docker run -d -e CLUSTER_NAME="$CLUSTER_NAME" --name node1 $IMAGE
-SEEDS=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' node1)
+SEEDS=`docker exec node1 hostname -i`
 let n=1
 while [ $n != $NUM_NODES ]; do
     let n=n+1
